@@ -1,3 +1,5 @@
+import InvoiceDetails from "src/modules/invoice-details/invoiceDetails";
+
 export default function InvoiceDetailPage() {
-  return <div>InvoiceDetailPage</div>;
+  return <InvoiceDetails />;
 }

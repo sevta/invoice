@@ -1,10 +1,11 @@
+/* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable react/no-unescaped-entities */
-import { Grid, Stack, Text, Title } from "@mantine/core";
-import Debugger from "src/components/ui/debugger";
-import { InvoiceForm } from "./invoice-form";
+import { Grid, Image, Stack, Text, Title } from "@mantine/core";
+import moment from "moment";
+import { InvoiceFormType } from "../types";
 
 interface InvoicePreviewProps {
-  invoice?: InvoiceForm;
+  invoice?: InvoiceFormType;
 }
 
 export default function InvoicePreview(props: InvoicePreviewProps) {
@@ -12,24 +13,26 @@ export default function InvoicePreview(props: InvoicePreviewProps) {
     <div>
       <Grid>
         <Grid.Col xs={4}>
-          <Title>Logo</Title>
+          {props.invoice?.image ? (
+            <Image src={props.invoice?.image} style={{ maxWidth: 200 }} />
+          ) : (
+            <Title order={2}>{props.invoice?.clientName}</Title>
+          )}
         </Grid.Col>
         <Grid.Col xs={4}>
           <Stack>
             <div>
               <Text size="sm">Bill's from</Text>
               <Text size="sm" weight="bold">
-                Karla digital project
+                {props.invoice?.clientName || "-"}
               </Text>
-              <Text size="sm">
-                Kebon Jeruk No. 29, Kel. Kebon Jeruk - Jakarta Barat
-              </Text>
+              <Text size="sm">{props.invoice?.clientAddress || "-"}</Text>
             </div>
 
             <div>
               <Text size="sm">Phone</Text>
               <Text size="sm" weight="bold">
-                0812-9556-0113
+                {props.invoice?.clientPhoneNumber || "-"}
               </Text>
             </div>
           </Stack>
@@ -39,23 +42,26 @@ export default function InvoicePreview(props: InvoicePreviewProps) {
             <div>
               <Text size="sm">Bill's to</Text>
               <Text size="sm" weight="bold">
-                Karla digital project
+                {props.invoice?.billTo || "-"}
               </Text>
-              <Text size="sm">
-                Kebon Jeruk No. 29, Kel. Kebon Jeruk - Jakarta Barat
+            </div>
+            <div>
+              <Text size="sm">Invoice date</Text>
+              <Text size="sm" weight="bold">
+                {moment(props.invoice?.invoiceDate).format("YYYY-MM-DD") || "-"}
               </Text>
             </div>
 
             <div>
-              <Text size="sm">Phone</Text>
+              <Text size="sm">Invoice number</Text>
               <Text size="sm" weight="bold">
-                0812-9556-0113
+                {props.invoice?.invoiceNumber || "-"}
               </Text>
             </div>
           </Stack>
         </Grid.Col>
       </Grid>
-      <Debugger data={props.invoice} />
+      {/* <Debugger data={props.invoice} /> */}
     </div>
   );
 }

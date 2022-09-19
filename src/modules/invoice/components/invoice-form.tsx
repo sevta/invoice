@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/alt-text */
 import {
   Accordion,
   ActionIcon,
@@ -7,6 +8,8 @@ import {
   Divider,
   Grid,
   Group,
+  Image,
+  LoadingOverlay,
   Modal,
   NumberInput,
   SimpleGrid,
@@ -14,60 +17,61 @@ import {
   Text,
   TextInput,
   Title,
+  useMantineTheme,
 } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
+import { Dropzone, FileWithPath, IMAGE_MIME_TYPE } from "@mantine/dropzone";
 import { useForm, yupResolver } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
-import { IconCodePlus, IconFile, IconFilePlus, IconTrash } from "@tabler/icons";
+import { showNotification } from "@mantine/notifications";
+import {
+  IconCodePlus,
+  IconFile,
+  IconFilePlus,
+  IconPhoto,
+  IconTrash,
+  IconTrashX,
+  IconUpload,
+  IconX,
+} from "@tabler/icons";
 import { addDoc, collection } from "firebase/firestore";
-import { useEffect } from "react";
-import { db } from "src/utils/firebase";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { useEffect, useState } from "react";
+import { db, storage } from "src/utils/firebase";
 import { v4 as uuidv4 } from "uuid";
 import { object, string } from "yup";
+import {
+  InvoiceFormType,
+  InvoiceItem,
+  InvoiceItemList,
+  Status,
+} from "../types";
 import InvoicePreview from "./invoice-preview";
 
-interface InvoiceFormProps {}
-
-export type InvoiceItemList = {
-  id?: string;
-  itemName?: string;
-  itemDescription?: string;
-  itemQuantity?: number;
-  itemUnitPrice?: number;
-  itemTotal?: number;
-};
-
-export type InvoiceItem = {
-  id: string;
-  name: string;
-  lists: InvoiceItemList[];
-};
-
-export type InvoiceForm = {
-  clientName: string;
-  clientAddress: string;
-  clientPhoneNumber: string;
-  clientEmail: string;
-  items: InvoiceItem[];
-  status: Status;
-  total: number;
-  createdAt: string | number;
-};
-
-export enum Status {
-  DRAFT,
-  PUBLISH,
+interface InvoiceFormProps {
+  invoice?: InvoiceFormType;
 }
 
-export default function InvoiceForm({ ...props }: InvoiceFormProps) {
+export default function InvoiceForm({ invoice, ...props }: InvoiceFormProps) {
   const [showModalAddItem, handlerShowModalAddItem] = useDisclosure(false);
+  const [file, setFile] = useState<FileWithPath[]>([]);
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [previewImage, setPreviewImage] = useState<any>();
+  const theme = useMantineTheme();
 
-  const form = useForm<InvoiceForm>({
+  const form = useForm<InvoiceFormType>({
     initialValues: {
       clientName: "",
       clientAddress: "",
       clientPhoneNumber: "",
       clientEmail: "",
+      image: "",
+      billTo: "",
+      invoiceNumber: "",
+      invoiceDate: "",
+      paymentDue: "",
+      paymentTerms: "",
+      paymentDescription: "",
       items: [],
       status: Status.DRAFT,
       total: 0,
@@ -80,6 +84,12 @@ export default function InvoiceForm({ ...props }: InvoiceFormProps) {
         clientAddress: string().required(),
         clientPhoneNumber: string().required(),
         clientEmail: string().email().required(),
+        billTo: string().required(),
+        invoiceNumber: string().required(),
+        invoiceDate: string().required(),
+        paymentDue: string().required(),
+        paymentTerms: string().required(),
+        paymentDescription: string().required(),
       })
     ),
   });
@@ -136,22 +146,58 @@ export default function InvoiceForm({ ...props }: InvoiceFormProps) {
     console.log({ calc });
   }
 
+  function handleSetDefaultValue() {
+    if (invoice !== undefined) {
+      form.setValues({
+        ...invoice,
+      });
+    }
+  }
+
   useEffect(() => calculateTotal(), [form.values?.items]);
 
-  async function handleSubmit(values: InvoiceForm) {
+  useEffect(() => {
+    handleSetDefaultValue();
+  }, [invoice]);
+
+  async function handleSubmit(values: InvoiceFormType) {
+    setLoadingSubmit(true);
     form.setFieldValue("createdAt", Date.now());
+
     try {
-      const resp = await addDoc(collection(db, "invoices"), {
+      if (previewImage) {
+        const storageRef = ref(storage, file[0].path);
+        await uploadBytes(storageRef, file[0]);
+        const downloadUrl = await getDownloadURL(ref(storage, file[0].path));
+        form.setFieldValue("image", downloadUrl);
+      }
+      await addDoc(collection(db, "invoices"), {
         ...form.values,
       });
-      console.log({ resp });
+      showNotification({ message: "success add new invoice" });
+      form.reset();
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoadingSubmit(false);
     }
+  }
+
+  function handleDropFile(file: FileWithPath[]) {
+    setFile(file);
+    const objectUrl = URL.createObjectURL(file[0]);
+    setPreviewImage(objectUrl);
+    form.setFieldValue("image", objectUrl);
+  }
+
+  function handleRemovePreviewImage() {
+    setPreviewImage(null);
+    form.setFieldValue("image", "");
   }
 
   return (
     <Box>
+      <LoadingOverlay visible={loadingSubmit} />
       <Modal
         radius="md"
         size="70%"
@@ -172,16 +218,81 @@ export default function InvoiceForm({ ...props }: InvoiceFormProps) {
         </Button>
       </Affix>
       <form onSubmit={form.onSubmit(handleSubmit)}>
-        <Divider
-          mb="md"
-          label={
-            <Group position="center">
-              <Title>Invoice</Title>
-            </Group>
-          }
-        />
+        <Divider mb="md" label={<Title>Invoice</Title>} />
 
         <Stack>
+          <SimpleGrid cols={2}>
+            <Stack>
+              {previewImage ? (
+                <div>
+                  <ActionIcon
+                    radius="xl"
+                    color="red"
+                    size="lg"
+                    variant="light"
+                    onClick={handleRemovePreviewImage}
+                  >
+                    <IconTrashX size={20} />
+                  </ActionIcon>
+                  <Image src={previewImage} />
+                </div>
+              ) : (
+                <Dropzone
+                  onDrop={handleDropFile}
+                  onReject={(files) => console.log("rejected files", files)}
+                  maxSize={3 * 1024 ** 2}
+                  accept={IMAGE_MIME_TYPE}
+                  {...props}
+                >
+                  <Group
+                    position="center"
+                    spacing="xl"
+                    style={{ minHeight: 140, pointerEvents: "none" }}
+                  >
+                    <Dropzone.Accept>
+                      <IconUpload
+                        size={50}
+                        stroke={1.5}
+                        color={
+                          theme.colors[theme.primaryColor][
+                            theme.colorScheme === "dark" ? 4 : 6
+                          ]
+                        }
+                      />
+                    </Dropzone.Accept>
+                    <Dropzone.Reject>
+                      <IconX
+                        size={50}
+                        stroke={1.5}
+                        color={
+                          theme.colors.red[theme.colorScheme === "dark" ? 4 : 6]
+                        }
+                      />
+                    </Dropzone.Reject>
+                    <Dropzone.Idle>
+                      <IconPhoto size={50} stroke={1.5} />
+                    </Dropzone.Idle>
+
+                    <div>
+                      <Text weight={600} align="center" inline>
+                        Drag images here or click to select files
+                      </Text>
+                      <Text
+                        size="xs"
+                        align="center"
+                        color="dimmed"
+                        inline
+                        mt={7}
+                      >
+                        Attach as many files as you like, each file should not
+                        exceed 5mb
+                      </Text>
+                    </div>
+                  </Group>
+                </Dropzone>
+              )}
+            </Stack>
+          </SimpleGrid>
           <SimpleGrid cols={2}>
             <TextInput
               label="Clients"
@@ -211,17 +322,39 @@ export default function InvoiceForm({ ...props }: InvoiceFormProps) {
         <Divider my="md" label={<Title>Bill</Title>} />
         <Stack>
           <SimpleGrid cols={2}>
-            <TextInput label="Bill to" description="Bill to" />
-            <TextInput label="Invoice number" description="Invoice number" />
+            <TextInput
+              label="Bill to"
+              description="Bill to"
+              {...form.getInputProps("billTo")}
+            />
+            <TextInput
+              label="Invoice number"
+              description="Invoice number"
+              {...form.getInputProps("invoiceNumber")}
+            />
           </SimpleGrid>
           <SimpleGrid cols={2}>
-            <DatePicker label="Invoice date" description="Invoice date" />
-            <DatePicker label="Payment due" description="Payment due" />
+            <DatePicker
+              label="Invoice date"
+              description="Invoice date"
+              {...form.getInputProps("invoiceDate")}
+            />
+            <DatePicker
+              label="Payment due"
+              description="Payment due"
+              format
+              {...form.getInputProps("paymentDue")}
+            />
           </SimpleGrid>
-          <TextInput label="Payment terms" description="Payment terms client" />
+          <TextInput
+            label="Payment terms"
+            description="Payment terms client"
+            {...form.getInputProps("paymentTerms")}
+          />
           <TextInput
             label="Payment description"
             description="Payment description client"
+            {...form.getInputProps("paymentDescription")}
           />
         </Stack>
         <Divider my="md" label={<Title>Items</Title>} />

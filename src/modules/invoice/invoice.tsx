@@ -15,7 +15,7 @@ export default function Invoice() {
           leftIcon={<IconChevronLeft size={16} />}
           size="sm"
           compact
-          variant="subtle"
+          variant="light"
           onClick={() => router.back()}
         >
           back

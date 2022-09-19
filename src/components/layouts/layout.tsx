@@ -11,7 +11,8 @@ export default function Layout({ children }: LayoutProps) {
         backgroundColor:
           theme.colorScheme === "light"
             ? theme.fn.lighten(theme.colors[theme.primaryColor][5], 0)
-            : theme.colors.dark[5],
+            : // theme.colors.gray[1]
+              theme.colors.dark[5],
       }}
     >
       {children}

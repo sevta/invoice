@@ -1,3 +1,9 @@
+import "@fontsource/source-sans-pro/200.css";
+import "@fontsource/source-sans-pro/300.css";
+import "@fontsource/source-sans-pro/400.css";
+import "@fontsource/source-sans-pro/600.css";
+import "@fontsource/source-sans-pro/700.css";
+import "@fontsource/source-sans-pro/900.css";
 import { MantineProvider } from "@mantine/core";
 import { AppProps } from "next/app";
 import Head from "next/head";
@@ -22,12 +28,24 @@ export default function App(props: AppProps) {
           /** Put your mantine theme override here */
           colorScheme: "light",
           primaryColor: "blue",
+          // fontFamily: "Source Sans Pro",
           fontFamily: "Inter",
           headings: {
+            // fontFamily: "Source Sans Pro",
             fontFamily: "Inter",
           },
           components: {
+            Button: {
+              styles: {
+                root: {
+                  fontWeight: 500,
+                },
+              },
+            },
             Title: {
+              defaultProps: {
+                // weight: 600,
+              },
               styles: {
                 root: {
                   letterSpacing: "-0.05em",
@@ -37,16 +55,19 @@ export default function App(props: AppProps) {
             TextInput: {
               defaultProps: {
                 variant: "filled",
+                // radius: "xs",
               },
             },
             NumberInput: {
               defaultProps: {
                 variant: "filled",
+                // radius: "xs",
               },
             },
             DatePicker: {
               defaultProps: {
                 variant: "filled",
+                // radius: "xs",
               },
             },
             Stack: {

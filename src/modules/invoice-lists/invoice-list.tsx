@@ -1,21 +1,14 @@
-import {
-  Affix,
-  Button,
-  Card,
-  LoadingOverlay,
-  SimpleGrid,
-  Text,
-} from "@mantine/core";
+import { Affix, Button, Card, LoadingOverlay, SimpleGrid } from "@mantine/core";
 import { NextLink } from "@mantine/next";
 import { collection, getDocs } from "firebase/firestore";
-import moment from "moment";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Layout from "src/components/layouts/layout";
 import { db } from "src/utils/firebase";
-import { InvoiceForm } from "./components/invoice-form";
+import InvoicePreview from "../invoice/components/invoice-preview";
+import { InvoiceFormType } from "../invoice/types";
 
-interface Invoice extends InvoiceForm {
+interface Invoice extends InvoiceFormType {
   id: string;
 }
 
@@ -60,8 +53,7 @@ export default function InvoiceLists() {
           create new
         </Button>
       </Affix>
-      <Text>List invoice</Text>
-      <SimpleGrid cols={4}>
+      <SimpleGrid cols={2}>
         {listInvoice?.map((item, index) => (
           <Card
             shadow="xs"
@@ -69,14 +61,15 @@ export default function InvoiceLists() {
             sx={{ cursor: "pointer" }}
             onClick={() => router.push(`/invoice/${item.id}`)}
           >
-            <Text size="sm" color="dimmed">
+            {/* <Text size="sm" color="dimmed">
               {item.clientName}
             </Text>
             <Text size="sm" weight="bold">
               {item.createdAt
                 ? moment(item.createdAt).format("YYYY-MM-DD")
                 : "-"}
-            </Text>
+            </Text> */}
+            <InvoicePreview invoice={item} />
           </Card>
         ))}
       </SimpleGrid>
