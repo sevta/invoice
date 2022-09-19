@@ -1,0 +1,85 @@
+import {
+  Affix,
+  Button,
+  Card,
+  LoadingOverlay,
+  SimpleGrid,
+  Text,
+} from "@mantine/core";
+import { NextLink } from "@mantine/next";
+import { collection, getDocs } from "firebase/firestore";
+import moment from "moment";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import Layout from "src/components/layouts/layout";
+import { db } from "src/utils/firebase";
+import { InvoiceForm } from "./components/invoice-form";
+
+interface Invoice extends InvoiceForm {
+  id: string;
+}
+
+export default function InvoiceLists() {
+  const [listInvoice, setListInvoice] = useState<Invoice[]>();
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  async function getInvoiceLists() {
+    setLoading(true);
+    try {
+      let data: any[] = [];
+      const querySnapshot = await getDocs(collection(db, "invoices"));
+      querySnapshot.forEach((doc) => {
+        data.push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+
+      setListInvoice(data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    getInvoiceLists();
+  }, []);
+  return (
+    <Layout>
+      <LoadingOverlay visible={loading} />
+      <Affix
+        position={{
+          bottom: 60,
+          right: 90,
+        }}
+      >
+        <Button component={NextLink} href="/invoice/create">
+          create new
+        </Button>
+      </Affix>
+      <Text>List invoice</Text>
+      <SimpleGrid cols={4}>
+        {listInvoice?.map((item, index) => (
+          <Card
+            shadow="xs"
+            key={index}
+            sx={{ cursor: "pointer" }}
+            onClick={() => router.push(`/invoice/${item.id}`)}
+          >
+            <Text size="sm" color="dimmed">
+              {item.clientName}
+            </Text>
+            <Text size="sm" weight="bold">
+              {item.createdAt
+                ? moment(item.createdAt).format("YYYY-MM-DD")
+                : "-"}
+            </Text>
+          </Card>
+        ))}
+      </SimpleGrid>
+    </Layout>
+  );
+}
