@@ -27,6 +27,7 @@ import { showNotification } from "@mantine/notifications";
 import {
   IconCodePlus,
   IconFile,
+  IconFileDownload,
   IconFilePlus,
   IconPhoto,
   IconTrash,
@@ -558,7 +559,12 @@ export default function InvoiceForm({ invoice, ...props }: InvoiceFormProps) {
           </Button>
         </Group>
         <Group mt="xs">
-          <Button type="submit" fullWidth variant="light">
+          <Button
+            type="submit"
+            fullWidth
+            variant="subtle"
+            leftIcon={<IconFileDownload size={16} />}
+          >
             Save
           </Button>
         </Group>

@@ -12,14 +12,14 @@ export default function InvoicePreview(props: InvoicePreviewProps) {
   return (
     <div>
       <Grid>
-        <Grid.Col xs={4}>
+        <Grid.Col xs={6}>
           {props.invoice?.image ? (
             <Image src={props.invoice?.image} style={{ maxWidth: 200 }} />
           ) : (
             <Title order={2}>{props.invoice?.clientName}</Title>
           )}
         </Grid.Col>
-        <Grid.Col xs={4}>
+        <Grid.Col xs={3}>
           <Stack>
             <div>
               <Text size="sm">Bill's from</Text>
@@ -37,7 +37,7 @@ export default function InvoicePreview(props: InvoicePreviewProps) {
             </div>
           </Stack>
         </Grid.Col>
-        <Grid.Col xs={4}>
+        <Grid.Col xs={3}>
           <Stack>
             <div>
               <Text size="sm">Bill's to</Text>

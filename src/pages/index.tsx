@@ -1,5 +1,5 @@
-import Invoice from "src/modules/invoice/invoice";
+import InvoiceLists from "src/modules/invoice-lists/invoice-list";
 
 export default function Index() {
-  return <Invoice />;
+  return <InvoiceLists />;
 }
