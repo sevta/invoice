@@ -13,6 +13,11 @@ export type InvoiceItem = {
   lists: InvoiceItemList[];
 };
 
+type DateTypes = {
+  seconds: number;
+  nanoseconds: number;
+};
+
 export type InvoiceFormType = {
   clientName: string;
   clientAddress: string;
@@ -20,8 +25,8 @@ export type InvoiceFormType = {
   clientEmail: string;
   billTo: string;
   invoiceNumber: string;
-  invoiceDate: string;
-  paymentDue: string;
+  invoiceDate: any;
+  paymentDue: any;
   paymentTerms: string;
   paymentDescription: string;
   items: InvoiceItem[];

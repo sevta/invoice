@@ -147,10 +147,29 @@ export default function InvoiceForm({ invoice, ...props }: InvoiceFormProps) {
     console.log({ calc });
   }
 
+  function convertDate(seconds: number, nanoseconds: number) {
+    return new Date(seconds * 1000 + nanoseconds / 1000000);
+  }
+
   function handleSetDefaultValue() {
     if (invoice !== undefined) {
       form.setValues({
+        ...form.values,
         ...invoice,
+        paymentDue:
+          invoice.paymentDue !== ""
+            ? convertDate(
+                invoice.paymentDue?.seconds,
+                invoice.paymentDue?.nanoseconds
+              )
+            : "",
+        invoiceDate:
+          invoice.invoiceDate !== ""
+            ? convertDate(
+                invoice.invoiceDate?.seconds,
+                invoice.invoiceDate?.nanoseconds
+              )
+            : "",
       });
     }
   }
@@ -343,7 +362,6 @@ export default function InvoiceForm({ invoice, ...props }: InvoiceFormProps) {
             <DatePicker
               label="Payment due"
               description="Payment due"
-              format
               {...form.getInputProps("paymentDue")}
             />
           </SimpleGrid>

@@ -41,7 +41,7 @@ export default function InvoiceLists() {
     getInvoiceLists();
   }, []);
   return (
-    <Layout>
+    <Layout withBackground={false}>
       <LoadingOverlay visible={loading} />
       <Affix
         position={{

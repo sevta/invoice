@@ -1,8 +1,13 @@
 import { AppShell, AppShellProps, Box, useMantineTheme } from "@mantine/core";
 
-interface LayoutProps extends AppShellProps {}
+interface LayoutProps extends AppShellProps {
+  withBackground?: boolean;
+}
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({
+  withBackground = true,
+  children,
+}: LayoutProps) {
   const theme = useMantineTheme();
 
   return (
@@ -15,16 +20,19 @@ export default function Layout({ children }: LayoutProps) {
             : theme.colors.dark[5],
       }}
     >
-      <Box
-        sx={{
-          width: "100%",
-          height: "35vh",
-          position: "fixed",
-          top: 0,
-          left: 0,
-          backgroundColor: theme.fn.primaryColor(),
-        }}
-      ></Box>
+      {withBackground && (
+        <Box
+          sx={{
+            width: "100%",
+            height: "35vh",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            backgroundColor: theme.fn.primaryColor(),
+          }}
+        ></Box>
+      )}
+
       {children}
     </AppShell>
   );

@@ -4,6 +4,17 @@ import "@fontsource/source-sans-pro/400.css";
 import "@fontsource/source-sans-pro/600.css";
 import "@fontsource/source-sans-pro/700.css";
 import "@fontsource/source-sans-pro/900.css";
+
+import "@fontsource/poppins/100.css";
+import "@fontsource/poppins/200.css";
+import "@fontsource/poppins/300.css";
+import "@fontsource/poppins/400.css";
+import "@fontsource/poppins/500.css";
+import "@fontsource/poppins/600.css";
+import "@fontsource/poppins/700.css";
+import "@fontsource/poppins/800.css";
+import "@fontsource/poppins/900.css";
+
 import { MantineProvider } from "@mantine/core";
 import { AppProps } from "next/app";
 import Head from "next/head";
@@ -27,12 +38,14 @@ export default function App(props: AppProps) {
         theme={{
           /** Put your mantine theme override here */
           colorScheme: "light",
-          primaryColor: "pink",
+          primaryColor: "blue",
           // fontFamily: "Source Sans Pro",
-          fontFamily: "Inter",
+          fontFamily: "Poppins",
+          // fontFamily: "Inter",
           headings: {
             // fontFamily: "Source Sans Pro",
-            fontFamily: "Inter",
+            fontFamily: "Poppins",
+            // fontFamily: "Inter",
           },
           components: {
             Button: {
